@@ -48,15 +48,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Git
-        github-token: ${{ secrets.GH_TOKEN }}
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git remote set-url origin "https://github.com/${{ github.repository }}.git"
+          git remote set-url origin "https://$GH_TOKEN@github.com/suid04100/${{ github.repository }}.git"
           git fetch --prune --unshallow
 
       - name: Update version.txt
-        github-token: ${{ secrets.GH_TOKEN }}
         run: |
           echo "${{ needs.determine-version.outputs.VERSION }}" > version.txt
           git add version.txt
