@@ -24,7 +24,7 @@ jobs:
       - name: Determine version
         id: version
         run: |
-            commit_messages=$(git log --format=%B)
+          commit_messages=$(git log --format=%B)
           current_version=$(cat version.txt)
 
           # Your versioning logic here
