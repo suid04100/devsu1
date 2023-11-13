@@ -62,7 +62,6 @@ jobs:
           git push --set-upstream origin prod:${{ github.ref }}
 
       - name: Create and push tag
-        github-token: ${{ secrets.GH_TOKEN }}
         run: |
           git tag v${{ needs.determine-version.outputs.VERSION }}
           git push origin v${{ needs.determine-version.outputs.VERSION }}
