@@ -31,9 +31,9 @@ jobs:
           current_version=$(cat version.txt)
           commit_messages=$(git log --format=%B)
           
-          if [[ $commit_messages == *"[major]"* ]]; then
+          if [[ $commit_messages == *"[break]"* ]]; then
             new_version=$(echo $current_version | awk -F. -v OFS=. '{++$1; $2=0; $3=0; print}')
-          elif [[ $commit_messages == *"[minor]"* ]]; then
+          elif [[ $commit_messages == *"[feat]"* ]]; then
             new_version=$(echo $current_version | awk -F. -v OFS=. '{++$2; $3=0; print}')
           else
             new_version=$(echo $current_version | awk -F. -v OFS=. '{$3+=1; print}')
@@ -41,3 +41,28 @@ jobs:
 
           echo "New version: $new_version"
           echo "::set-output name=VERSION::$new_version"
+
+  tag:
+    needs: determine-version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Git
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+
+      - name: Update version.txt
+        run: |
+          echo "${{ needs.determine-version.outputs.VERSION }}" > version.txt
+          git add version.txt
+          git commit -m "Bumping version to ${{ needs.determine-version.outputs.VERSION }}"
+          git push
+
+      - name: Create and push tag
+        run: |
+          git tag v${{ needs.determine-version.outputs.VERSION }}
+          git push origin v${{ needs.determine-version.outputs.VERSION }}
