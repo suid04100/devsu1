@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Determine version
         id: version
@@ -45,19 +45,21 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Git
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
+          git remote set-url origin "https://github.com/${{ github.repository }}.git"
+          git fetch --prune --unshallow
 
       - name: Update version.txt
         run: |
           echo "${{ needs.determine-version.outputs.VERSION }}" > version.txt
           git add version.txt
           git commit -m "Bump version to ${{ needs.determine-version.outputs.VERSION }}"
-          git push
+          git push --set-upstream origin prod:${{ github.ref }}
 
       - name: Create and push tag
         run: |
