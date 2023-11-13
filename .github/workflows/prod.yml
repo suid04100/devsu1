@@ -28,22 +28,16 @@ jobs:
       - name: Determine version
         id: version
         run: |
-          if [[ -n "${{ github.event.before }}" ]]; then
-            commit_messages=$(git log --format=%B ${{ github.event.before }}..HEAD)
+          current_version=$(cat version.txt)
+          commit_messages=$(git log --format=%B)
+          
+          if [[ $commit_messages == *"[major]"* ]]; then
+            new_version=$(echo $current_version | awk -F. -v OFS=. '{++$1; $2=0; $3=0; print}')
+          elif [[ $commit_messages == *"[minor]"* ]]; then
+            new_version=$(echo $current_version | awk -F. -v OFS=. '{++$2; $3=0; print}')
           else
-            # If github.event.before is not available, consider fetching all commits
-            commit_messages=$(git log --format=%B)
+            new_version=$(echo $current_version | awk -F. -v OFS=. '{$3+=1; print}')
           fi
 
-          current_version=$(cat version.txt)
-          
-          if [[ $commit_messages == *"[break]"* ]]; then
-             new_version=$(echo $current_version | awk -F. -v OFS=. '{++$1; $2=0; $3=0; print}')
-           elif [[ $commit_messages == *"[feat]"* ]]; then
-             new_version=$(echo $current_version | awk -F. -v OFS=. '{++$2; $3=0; print}')
-           else
-             new_version=$(echo $current_version | awk -F. -v OFS=. '{$3+=1; print}')
-           fi
-
-           echo "New version: $new_version"
-           echo "::set-output name=VERSION::$new_version"
+          echo "New version: $new_version"
+          echo "::set-output name=VERSION::$new_version"
