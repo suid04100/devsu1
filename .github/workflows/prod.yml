@@ -46,7 +46,7 @@ jobs:
           echo "::set-output name=VERSION::$new_version"
 
   tag:
-    needs: determine-version
+    needs: Determine version
     runs-on: ubuntu-latest
 
     steps:
