@@ -28,11 +28,14 @@ jobs:
       - name: Determine version
         id: version
         run: |
-          # Your versioning logic here
-          # Example: Increment the version based on conventional commit messages
+          if [[ -n "${{ github.event.before }}" ]]; then
+            commit_messages=$(git log --format=%B ${{ github.event.before }}..HEAD)
+          else
+            # If github.event.before is not available, consider fetching all commits
+            commit_messages=$(git log --format=%B)
+          fi
+
           current_version=$(cat version.txt)
-          echo "$current_version"
-          commit_messages=$(git log --format=%B ${{ github.event.before }}..HEAD)
           
           if [[ $commit_messages == *"[break]"* ]]; then
              new_version=$(echo $current_version | awk -F. -v OFS=. '{++$1; $2=0; $3=0; print}')
